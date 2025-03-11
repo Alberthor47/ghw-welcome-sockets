@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our GHW Chat!</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <section id="chat">
+    <div id="chat-window">
+      <div id="output"></div>
+      <div id="feedback"></div>
+    </div>
+    <div id="separator"></div>
+    <form id="chat-input">
+      <input id="message" type="text" placeholder="Message">
+      <button id="send" type="submit">Send</button>
+    </form>
+  </section>
+  <script type="module">
+    import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
+
+    const socket = io('http://localhost:8080');
+
+    socket.on("connect", () => {
+      console.log('Connected to the server!', socket.connected); // true
+    });
+
+    socket.on("message", (message) => {
+      console.log('A message from server: ', message);
+      // Write in the chat window the message received
+      const output = document.getElementById("output");
+      output.innerHTML += `<p><strong>Someone:</strong> ${message}</p>`;
+    });
+
+    document.getElementById("chat-input").addEventListener("submit", (e) => {
+      e.preventDefault();
+      // Get the message from the input field
+      const message = document.getElementById("message").value;
+
+      // Emit the message to the server & clear the input field
+      socket.emit("message", message);
+      document.getElementById("message").value = "";
+
+      // Write in the chat window the message sent
+      const output = document.getElementById("output");
+      output.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+    });
+  </script>
+</body>
+</html>
